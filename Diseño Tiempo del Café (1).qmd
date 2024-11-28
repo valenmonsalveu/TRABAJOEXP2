@@ -1,0 +1,636 @@
+---
+title: "Análisis Integral de los Factores que Afectan el Tiempo de Elaboración del Café"
+author: "Estefania Gil Tejada, Valentina Monsalve Urrego"
+lang: es
+theme: slate
+format: 
+  html:
+    toc: true
+    toc-location: left
+    number-sections: true
+editor: visual
+---
+
+![](DALL·E 2024-11-27 22.35.07 - Una ilustración estilizada y moderna que representa un análisis de café. En el centr.webp)
+
+***Objetivo General***
+
+Evaluar de manera integral el impacto de los diferentes factores en el tiempo de elaboración del café, con el propósito de identificar áreas de mejora y oportunidades de optimización que impulsen la eficiencia y competitividad en el proceso de preparación del café.
+
+Objetivos Específicos
+
+1.  **Identificar** cuál de los factores en el proceso de preparación del café tiene un impacto significativo en la disminución de los tiempos de preparación.
+
+2.  **Analizar** si el tipo de cafetera utilizado (alto rendimiento, automático o semiautomático) tiene un efecto real sobre la reducción de los tiempos de preparación del café.
+
+3.  **Evaluar** el impacto de la experiencia del barista (principiante, intermedio o experto) en la velocidad y efectividad del proceso de elaboración del café.
+
+***Descripción del Experimento en Términos del Diagrama del Proceso***
+
+1.  **Identificación de Factores y Niveles**
+
+-   **Factores Evaluados**:
+
+    1.  **Tamaño del Espresso**: Tres niveles (Pequeño, Mediano, Grande).
+
+    2.  **Experiencia del Barista**: Tres niveles (Principiante, Intermedio, Experto).
+
+    3.  **Tipo de Cafetera**: Tres tipos (Automático, Semiautomático, Alto Rendimiento).
+
+2.  **Diseño Experimental**
+
+-   **Tratamientos**: Combinaciones de los factores evaluados.
+
+-   **Total de Combinaciones**: 3×3×3 = 27 tratamientos.
+
+-   **Réplicas**: Cada combinación se replicará 3 veces.
+
+-   **Número Total de Observaciones**: 27 tratamientos×3 replicas= 81 observaciones.
+
+3.  **Ejecución del Experimento**
+
+-   **Preparación del Café**:
+
+    -   Para cada tratamiento (una combinación específica de tamaño, experiencia y tipo de cafetera), el barista prepara el espresso.
+
+    -   **Medición del Tiempo**: Se mide el tiempo total de preparación del café en mililitros de espresso.
+
+4.  **Recolección de Datos**
+
+-   **Datos Registrados**:
+
+    -   Tiempo de preparación para cada combinación de factores.
+
+    -   Registros organizados en una tabla con columnas para Tamaño, Experiencia, Tipo de Cafetera y Tiempo de Preparación.
+
+5.  **Análisis de Datos**
+
+-   **Análisis Estadístico**:
+
+    -   Se utiliza un modelo de regresión lineal para analizar el impacto de los factores en el tiempo de preparación.
+
+    -   Se evalúan los efectos principales y las interacciones entre los factores.
+
+    -   **Verificación de Supuestos**: Gráficas de normalidad y análisis de residuos para asegurar la adecuación del modelo.
+
+6.  **Interpretación de Resultados**
+
+-   **Identificación de Factores Significativos**:
+
+    -   Se determina cuál de los factores (tamaño, experiencia, tipo de cafetera) tiene un impacto significativo en la reducción del tiempo de preparación.
+
+    -   Se evalúa la interacción entre los factores para identificar combinaciones óptimas.
+
+7.  **Conclusiones y Recomendaciones**
+
+-   **Resultados Clave**:
+
+    -   Factores y niveles que optimizan la eficiencia del proceso de preparación del café.
+
+    -   Recomendaciones para implementar mejoras en el proceso con base en los hallazgos.
+
+```{r,echo=FALSE,warning=FALSE}
+library(readxl)
+#| echo: false
+#| warning: false
+library(readxl)
+datos <- read_excel("datos experimento.xlsx")
+View(datos)
+attach(datos)
+```
+
+## Análisis descriptivo
+
+### Diagramas de Factores VS Tiempo
+
+```{r}
+#| echo: false
+#| warning: false
+Tamaño <- as.factor(Tamaño)
+Cafetera <- as.factor(Cafetera)
+Experiencia <- as.factor(Experiencia)
+
+par(mfrow=c(1,3))
+boxplot(Tiempo ~ Tamaño, xlab="Tamaño del Expresso", ylab="Tiempo en segundos")
+boxplot(Tiempo ~ Cafetera, xlab="Cafetera", ylab="Tiempo en segundos")
+boxplot(Tiempo ~ Experiencia, xlab="Experiencia", ylab="Tiempo en segundos")
+```
+
+Dados los gráficos podemos concluir que:
+
+-   **Tamaño:** La mediana de los tiempos para el expreso grande está cerca de los 75 segundos, mientras que para el expreso pequeño está cerca de los 50 segundos. Esto sugiere que, en promedio, los tiempos de preparación para los expresos grandes son más largos que los de los expresos pequeños.
+
+-   **Maquinas:** El hecho de que la mediana para el tamaño grande sea más alta sugiere que, en promedio, los baristas o máquinas tardan más en preparar un expreso grande que uno pequeño.
+
+-   **Cafetera:** No hay diferencias significativas entre las medianas de las tres cafeteras. Todas están cerca de los 60-65 segundos, lo que indica que, en promedio, el tiempo de preparación es similar para todos los tipos de cafeteras.
+
+### Diagramas Factores Vs Tiempo Promedio
+
+```{r}
+#| echo: false
+#| warning: false
+require(gplots)
+par(mfrow=c(1,3))
+plotmeans(Tiempo  ~ Tamaño, xlab="Tamaño de expresso", ylab="Tiempo Promedio")
+plotmeans(Tiempo  ~ Cafetera, xlab="Tipo de Cafetera", ylab="Tiempo Promedio")
+plotmeans(Tiempo  ~ Experiencia, xlab="Experiencia", ylab="Tiempo Promedio")
+```
+
+-   El tiempo promedio disminuye a medida que el tamaño del espresso se reduce. Los espressos de tamaño grande toman más tiempo en prepararse en comparación con los medianos y pequeños.
+-   Hay una variabilidad en los tiempos promedio entre los diferentes tipos de cafeteras. Las cafeteras de alto rendimiento y automáticas tienden a tener tiempos promedio más bajos en comparación con las semiautomáticas.
+-   Los principiantes tienden a tomar más tiempo en la preparación en comparación con los expertos. Esto sugiere que la experiencia tiene un impacto significativo en la eficiencia del proceso.
+
+### Diagrama de Efectos Con Tiempo Promedio de Todos los Factores
+
+```{r}
+#| echo: false
+#| warning: false
+par(mfrow=c(1,1))
+require(graphics)
+formula <- Tiempo ~ Tamaño + Cafetera + Experiencia
+plot.design(formula, col= "coral", xlab="Efectos", ylab="Tiempo Promedio")
+```
+
+El diagrama de efectos indica que el tiempo promedio de preparación del café es influenciado por el tamaño del espresso, el tipo de cafetera y la experiencia del operador. Los espressos más pequeños, el uso de cafeteras automáticas o de alto rendimiento, y tener operadores expertos resultan en tiempos de preparación más cortos y consistentes. Estos resultados son útiles para optimizar el proceso de preparación del café y mejorar la eficiencia operativa.
+
+### Diagrama de interacción
+
+```{r}
+#| echo: false
+#| warning: false
+par(mfrow=c(1,3))
+interaction.plot(Tamaño, Cafetera, Tiempo, 
+                 xlab="Tamaño", ylab="Tiempo Promedio")
+interaction.plot( Experiencia, Tamaño, Tiempo, 
+                 xlab="Tamaño", ylab="Tiempo Promedio")
+interaction.plot(Cafetera, Experiencia, Tiempo, 
+                 xlab="Tamaño", ylab="Tiempo Promedio")
+```
+
+Los diagramas de interacción muestran cómo las variables "Tamaño", "Cafetera" y "Experiencia" influyen en el "Tiempo Promedio". Se observa que, en general, a medida que el tamaño de la cafetera disminuye, el tiempo promedio también lo hace, pero de forma más pronunciada en cafetera automática y de alto rendimiento. Además, los expertos tienden a tener un mejor desempeño, con menores tiempos en cafetera de mayor tamaño, mientras que los principiantes muestran tiempos más altos independientemente del tamaño. La interacción entre estos factores indica que tanto el tipo de cafetera como la experiencia del usuario influyen en el tiempo total, siendo los expertos más rápidos en las tareas, especialmente cuando usan equipos de alto rendimiento.
+
+## Prueba de normalidad para la variable respuesta
+
+```{r}
+#| echo: false
+#| warning: false
+require(car)
+par(mfrow=c(1,3))
+qqPlot(Tiempo, xlab="Cuantiles teóricos", ylab="Cuantiles muestrales", main="Gr?fico cuantil-cuantil")
+hist(Tiempo, xlab="Tiempo", ylab="Frecuencia", main="Histograma")
+boxplot(Tiempo, xlab="crecimiento",  main="Gráfico de cajas")
+
+require(nortest)
+shapiro.test(Tiempo)
+ad.test(Tiempo)
+```
+
+-   Dado que en el primer gráfico los puntos se alinean cerca de la diagonal, y que casi todos los puntos se encuentran agrupados en el área sombreada podemos inferir que los datos tienen una distribución normal.
+-   Dado que los datos del histograma tienen un comportamiento muy similar a la de campana podemos decir de este gráfico que los datos tienen distribución normal
+-   Dado que el boxplot tiene una forma asimetrica podríamos decir que los datos en el tienen distribución normal sin embagor en este gráfico se observa tambie que los datos presentan mucha disperción lo que sigiere que la distribución no es normal.
+-   Para concluir las pruebas Anderson-Darling normality test y Shapiro-Wilk normality test nos dan un p-valor mayor a 5% lo que nos indica que los datos tienen un comportamiento normal.
+
+```{r}
+#| echo: false
+#| warning: false
+modelo <-  aov(Tiempo ~ Tamaño * Cafetera * Experiencia, data = datos)
+summary(modelo)
+```
+
+-   **Tamaño:**
+
+Valor F: 37.747 Valor p: 5.54e-11 Interpretación: El factor "Tamaño" tiene un efecto significativo en el Tiempo de preparación (p \< 0.001). Esto sugiere que hay diferencias significativas en los tiempos de preparación entre los diferentes tamaños de café.
+
+-   **Cafetera:** Valor F: 1.657 Valor p: 0.200 Interpretación: El factor "Cafetera" no tiene un efecto significativo en el Tiempo de preparación (p \> 0.05). Esto indica que el tipo de cafetera no afecta significativamente el tiempo de preparación.
+
+-   **Experiencia:** Valor F: 68.560 Valor p: 1.51e-15 Interpretación: El factor "Experiencia" tiene un efecto significativo en el Tiempo de preparación (p \< 0.001). Esto sugiere que la experiencia del barista tiene un impacto significativo en la duración del tiempo de preparación.
+
+\###**Interacciones entre Factores:** Tamaño:Cafetera: Valor F: 0.784 Valor p: 0.540 Interpretación: No hay una interacción significativa entre los factores Tamaño y Cafetera (p \> 0.05). Esto indica que el efecto del tamaño en el tiempo de preparación no varía significativamente según el tipo de cafetera utilizada.
+
+-   **Tamaño:** Experiencia: Valor F: 0.973 Valor p: 0.430 Interpretación: No hay una interacción significativa entre los factores Tamaño y Experiencia (p \> 0.05). Esto indica que el efecto del tamaño en el tiempo de preparación no varía significativamente según la experiencia del barista.
+
+-   **Cafetera:** Experiencia: Valor F: 0.600 Valor p: 0.664 Interpretación: No hay una interacción significativa entre los factores Cafetera y Experiencia (p \> 0.05). Esto indica que el efecto del tipo de cafetera en el tiempo de preparación no varía significativamente según la experiencia del barista.
+
+-   **Tamaño:** Cafetera:Experiencia: Valor F: 1.078 Valor p: 0.392 Interpretación: No hay una interacción significativa entre los factores Tamaño, Cafetera y Experiencia en conjunto (p \> 0.05). Esto indica que la combinación de estos tres factores no tiene un efecto conjunto significativo en el tiempo de preparación.
+
+```{r}
+#| echo: false
+#| warning: false
+odel1e <- model.tables(modelo,type='effects')
+model1t <- model.tables(modelo,type='means')
+ygorro <- fitted(modelo)
+```
+
+##Modelo de Efectos Tiempo=μ+α Tama n ​ +β Experiencia​+ε Este modelo indica que Tamaño y Experiencia son factores que afectan significativamente el Tiempo, mientras que las interacciones no tienen un efecto significativo en el tiempo.
+
+##Modelo de Regresion
+
+```{r}
+#| echo: false
+#| warning: false
+modelo2 <- lm(Tiempo ~ Tamaño + Cafetera + Experiencia, data = datos)
+summary(modelo2)
+```
+
+Multiple R-squared: 0.7498. Esto significa que el modelo explica 74.98% de la variabilidad en el Tiempo. Es un buen modelo, pero no perfecto
+
+El valor F es 36.96 con un valor p de \< 2.2e-16, lo que indica que el modelo en su conjunto es significativo, es decir, al menos una de las variables predictoras tiene un efecto en el Tiempo.
+
+El modelo es bastante bueno para predecir el Tiempo. Tamaño y Experiencia son los factores más influyentes.
+
+## VALIDACIÓN DEL MODELO
+
+```{r}
+#| echo: false
+#| warning: false
+residuales <- rstandard(modelo)
+summary(residuales)
+```
+
+### Prueba de normalidad
+
+```{r}
+#| echo: false
+#| warning: false
+require(car)
+par(mfrow=c(1,3))
+qqPlot(residuales, xlab="Cuantiles teoricos", ylab="Cuantiles muestrales", main="Gr?fico cuantil-cuantil")
+```
+
+**Interpretación:** Dado que los puntos se distribuyen aproximadamente por la línea podemos concluir que los datos podriantener una distribución normal Ademas los datos se encuentran entre las barras sombreadas lo que indica que los datos estan dentro de la variabilidad.
+
+```{r}
+#| echo: false
+#| warning: false
+hist(residuales, xlab="Residuales", ylab="Frecuencia", main="Histograma")
+```
+
+**Interpretación:** El histograma nos muestra una curva muy similar a la de una campana lo que nos dice que podría haber distribución normal.
+
+```{r}
+#| echo: false
+#| warning: false
+boxplot(residuales, xlab="Residuales",  main="Gráfico de cajas")
+```
+
+**Interpretación:** La caja del boxplot tiene una forma simetrica lo que indica normalidad, Sin embargo se ven muchos valores atipicos lo que nos dice que puede que no haya comportamiento normal, para verificar haremos otros testeos.
+
+```{r}
+#| echo: false
+#| warning: false
+require(nortest)
+shapiro.test(residuales)
+```
+
+**Interpretación:** Dado un p-value = 0.7687 es decir mayor al 5% podemos concluir que hay normalidad en los datos.
+
+```{r}
+#| echo: false
+#| warning: false
+ad.test(residuales)
+```
+
+Dado el p-value = 0.7246 hay normalidad porque el valor p es mayor a la significancia.
+
+### Prueba de varianza constante
+
+```{r}
+#| echo: false
+#| warning: false
+valores_ajustados<-fitted(modelo)
+
+par(mfrow=c(1,4))
+plot(valores_ajustados, residuales, xlab="Valores ajustados", ylab="Residuales")
+abline(h=0, col = "gray60")
+
+plot(as.numeric(Tamaño), residuales, xlab="Tamaño", ylab="Residuales")
+abline(h=0, col = "gray60")
+
+plot(as.numeric(Experiencia), residuales, xlab="Experiencia", ylab="Residuales")
+abline(h=0, col = "gray60")
+
+plot(as.numeric(Cafetera), residuales, xlab="Cafetera", ylab="Residuales")
+abline(h=0, col = "gray60")
+```
+
+Interpretación En los gráficso de Valores ajustados, Tamaño, Experiencia y Cafetera Vs Residualeslos los puntos están dispersos aleatoriamente alrededor de cero sin un patrón claro, Lo que indica homocedasticidad o Varianza Constantes.
+
+```{r}
+#| echo: false
+#| warning: false
+require(car)
+# Test de Levene para cada factor
+leveneTest(Tiempo ~ factor(Tamaño), data = datos)        # Varianza constante respecto al Tamaño
+leveneTest(Tiempo ~ factor(Cafetera), data = datos)      # Varianza constante respecto a la Cafetera
+leveneTest(Tiempo ~ factor(Experiencia), data = datos)   # Varianza constante respecto a la Experiencia
+```
+
+**Interpretación:** Tamaño, Cafetera y Experiencia tienen valores p mayores a 0.05 (0.7711, 0.8562, y 0.7187, respectivamente).No hay evidencia suficiente para rechazar la hipótesis nula de homogeneidad de varianzas. Es decir, las varianzas parecen constantes entre los niveles de cada uno de estos factores.
+
+## Test de Levene para las interacciones
+
+```{r}
+#| echo: false
+#| warning: false
+leveneTest(Tiempo ~ factor(Tamaño)*factor(Cafetera), data = datos)        # Interacción Tamaño:Cafetera
+leveneTest(Tiempo ~ factor(Tamaño)*factor(Experiencia), data = datos)    # Interacción Tamaño:Experiencia
+leveneTest(Tiempo ~ factor(Cafetera)*factor(Experiencia), data = datos)  # Interacción Cafetera:Experiencia
+```
+
+Las interacciones (Tamaño: Cafetera), (Tamaño:Experiencia), y (Cafetera:Experiencia) tienen valores p mayores a 0.05 (0.8115, 0.5823, y 0.8524, respectivamente). Tampoco hay evidencia para afirmar que las varianzas difieren significativamente entre los niveles combinados de estos factores.
+
+## Test para todas las interacciones
+
+```{r}
+#| echo: false
+#| warning: false
+leveneTest(Tiempo ~ factor(Tamaño)*factor(Cafetera)*factor(Experiencia), data = datos)
+```
+
+El valor p es 0.9727, muy superior a 0.05. Las varianzas son consistentes incluso considerando la combinación de todos los factores.
+
+```{r}
+#| echo: false
+#| warning: false
+require(lmtest)
+bptest(modelo)
+```
+
+Hipótesis nula (H0): La varianza de los residuos es constante (homocedasticidad). Hipótesis alternativa (H1): La varianza de los residuos no es constante (heterocedasticidad). Dado que el valor p (0.03963) es menor que 0.05, se rechaza la hipótesis nula. Sin embargo como en los gráficos se probo homocedasticidad concluire homocedasticidad.
+
+### Prueba de independencia
+
+```{r}
+#| echo: false
+#| warning: false
+par(mfrow=c(1,3))
+plot(residuales, pch=16, ylab="Residuales", xlab="Orden", main="Gr?fico de Orden vs Residuales")
+abline(h=0)
+acf(residuales,ylim=c(-1,1), main="Grafico de ACF")
+pacf(residuales,ylim=c(-1,1), main="Grafico de PACF", ylab="PACF")
+```
+
+los residuos son independientes, ya que no se observan patrones claros en el Gráfico de Orden vs. Residuales, y tanto el ACF como el PACF indican que las autocorrelaciones están dentro de los intervalos de confianza.
+
+```{r}
+#| echo: false
+#| warning: false
+require(lmtest)
+dwtest(modelo,alternative="two.sided")
+```
+
+Hipótesis nula: No hay autocorrelación en los residuos del modelo. Hipótesis alternativa: Hay autocorrelación en los residuos del modelo. Dado que el valor p es muy alto (0.9947), no rechazamos la hipótesis nula. HAY INDEPENDENCIA
+
+# Comparaciones multiples
+
+### Comparaciones múltiples para Tamaño
+
+```{r}
+#| echo: false
+#| warning: false
+require(agricolae)
+LSD.test(modelo, "Tamaño", console=TRUE, group=FALSE)
+```
+
+-   Tamaño:
+
+Los tamaños grande, mediano y pequeño muestran diferencias significativas en el tiempo pues: Entre "grande" y "mediano": Diferencia de 12.42 unidades. Entre "grande" y "pequeño": Diferencia de 18.39 unidades. Entre "mediano" y "pequeño": Diferencia de 5.97 unidades. Esto indica que el tamaño afecta significativamente el tiempo. #El tamaño "grande" está asociado con un mayor tiempo, mientras que "pequeño" tiene los valores más bajos.
+
+### Comparaciones múltiples para Cafetera
+
+```{r}
+#| echo: false
+#| warning: false
+LSD.test(modelo, "Cafetera", console=TRUE, group=FALSE)
+```
+
+-   Las **cafeteras** alto rendimiento, automático y semiautomático no muestran diferencias significativas en el tiempo.
+
+-   Entre alto rendimiento y automático: Diferencia no significativa (p = 0.1029). Entre alto rendimiento y semiautomático: Diferencia no significativa (p = 0.1450). Entre automático y semiautomático: Diferencia no significativa (p = 0.8577). Esto sugiere que el tipo de cafetera no influye significativamente en el tiempo.
+
+### Comparaciones múltiples para Experiencia
+
+```{r}
+#| echo: false
+#| warning: false
+LSD.test(modelo, "Experiencia", console=TRUE, group=FALSE)
+```
+
+-   Los niveles de experiencia ("experto", "intermedio" y "principiante") muestran diferencias significativas en el tiempo. Entre experto y intermedio: Diferencia de -4.34, significativa (p = 0.0492). Entre experto y principiante: Diferencia de -23.74, significativa (p \< 0.0001). Entre intermedio y principiante: Diferencia de -19.40, significativa (p \< 0.0001). Esto indica que los principiantes tardan considerablemente más, mientras que los expertos tienen los tiempos más bajos.
+
+# Modelo de regresión y superficie de respuesta
+
+### Modelo de regresión con interacción
+
+```{r}
+#| echo: false
+#| warning: false
+modelo_interaccion <- lm(Tiempo ~ Tamaño * Experiencia, data = datos)
+summary(modelo_interaccion)
+```
+
+En este caso ajustamos el modelo con los factores relevantes #MODELO AJUSTADO . \## Modelo ajustado en función de Tamaño y Experiencia Tiempo = 64.7556 + (-15.6556 \* Tamañomediano) + (-18.5111 \* Tamañopequeño) + (4.8889 \* Experienciaintermedio) + (19.8333 \* Experienciaprincipiante) + (0.7667 \* Tamañomediano \* Experienciaintermedio) + (-2.4000 \* Tamañopequeño \* Experienciaintermedio) + (8.9444 \* Tamañomediano \* Experienciaprincipiante) + (2.7778 \* Tamañopequeño \* Experienciaprincipiante)
+
+```{r}
+#| echo: false
+#| warning: false
+par(mfrow=c(1,2))
+```
+
+# Superficie de respuesta
+
+
+```{r}
+
+tamaño <- seq(-1, 1, 0.1)
+experiencia <- seq(-1, 1, 0.1) ## Definimos el rango para Tamaño y Experiencia
+```
+
+## Definimos la función del modelo basado en tu ecuación
+
+```{r}
+#| echo: false
+#| warning: false
+model <- function(tamaño, experiencia) {
+  64.7556 + 
+    (-15.6556 * tamaño) + 
+    (-18.5111 * tamaño) + 
+    (4.8889 * experiencia) + 
+    (19.8333 * experiencia) + 
+    (0.7667 * tamaño * experiencia) + 
+    (-2.4000 * tamaño * experiencia) + 
+    (8.9444 * tamaño * experiencia) + 
+    (2.7778 * tamaño * experiencia)}
+
+```
+
+
+
+```{r}
+#| echo: false
+#| warning: false
+z <- outer(tamaño, experiencia, model) ## Calculamos los valores de z usando la función outer
+```
+
+## Gráfico de superficie de respuesta
+
+```{r}
+#| echo: false
+#| warning: false
+persp(tamaño, experiencia, z, phi=30, theta=130, 
+      xlab="Tamaño", ylab="Experiencia", 
+      zlab="Tiempo", col="lightblue", 
+      expand=0.9, ticktype="detailed")
+
+```
+
+## Gráfico de contornos
+
+```{r}
+#| echo: false
+#| warning: false
+contour(tamaño, experiencia, z, nlevels=30, xlab="Tamaño", ylab="Experiencia",
+        main="Gráfico de Contornos")
+
+library(plotly)
+```
+
+```{r}
+#| echo: false
+#| warning: false
+fig <- plot_ly(x = ~tamaño, y = ~experiencia, z = ~z)
+fig <- fig %>% add_surface()
+
+```
+
+
+```{r}
+#| echo: false
+#| warning: false
+fig
+
+library(plotly)
+
+fig <- plot_ly(x = ~tamaño, y = ~experiencia, z = ~z) %>% add_surface(
+  contours = list(
+    z = list(
+      show = TRUE,
+      usecolormap = TRUE,
+      highlightcolor = "#ff0000",
+      project = list(z = TRUE)
+    )
+  )
+)
+```
+
+```{r}
+#| echo: false
+#| warning: false
+fig <- fig %>% layout(
+  scene = list(
+    camera = list(
+      eye = list(x = 1.87, y = 0.88, z = -0.64)
+    )
+  )
+)
+
+fig
+```
+
+La superficie coloreada muestra cómo cambian los tiempos de preparación (z) en función de la experiencia del barista (x) y el tamaño del espresso (y).
+
+Los colores varían de amarillo a morado, donde cada color representa un rango de valores de tiempo, según la escala de la barra de colores.
+Experiencia del Barista: Cuanto mayor sea la experiencia del barista (valores más altos en el eje x), los tiempos de preparación tienden a ser más cortos (colores más claros, hacia el amarillo).
+
+Tamaño del Espresso: Los tamaños de espresso más grandes (valores más altos en el eje y) tienden a tener tiempos de preparación más largos (colores más oscuros, hacia el morado).
+
+En resumen, el gráfico tridimensional te ayuda a visualizar cómo interactúan la experiencia del barista y el tamaño del espresso para afectar el tiempo de preparación. Esta visualización es útil para identificar las combinaciones óptimas que resultan en tiempos de preparación más eficientes.
+
+#TAMAÑO DE MUESTRA Y REPLICAS
+
+```{r}
+#| echo: false
+#| warning: false
+require(pwr2)
+```
+
+```{r}
+#| echo: false
+#| warning: false
+## Definición de parámetros
+a <- 3  # Número de niveles del factor "Tamaño"
+b <- 3  # Número de niveles del factor "Experiencia"
+sigma <- sd(Tiempo)  # Desviación estándar residual del modelo
+D <- 5  # Diferencia mínima detectable entre medias (valor asumido)
+alpha <- 0.05  # Nivel de significancia (ajustado)
+beta <- 0.1  # Potencia = 1 - beta
+
+# Cálculo del tamaño del efecto para el factor "Tamaño"
+f.a <- sqrt((a * D^2) / (2 * b * sigma^2))
+
+
+# Cálculo del tamaño del efecto para el factor "Experiencia"
+f.b <- sqrt((b * D^2) / (2 * a * sigma^2))
+
+P1 <- pwr.2way(a = a, b = b, alpha = alpha, size.A = 27, size.B = 27, f.A = f.a, f.B = f.b) 
+P1 
+```
+
+-   Con esta potencia del 91%, Podemos asegurar de que si existen diferencias significativas en el Tiempo de preparación del café entre los diferentes niveles de "Tamaño" o "Experiencia", y el analisis es lo suficientemente sensible para detectarlas.
+
+-   Como el factor cafetera en este caso no fue significativo y lo quitamos del modelo vamos a analizar que pasa con la potencia si estos datos se eliminan y solo trabajamos con el factor experincia y tamaño.
+
+```{r}
+#| echo: false
+#| warning: false
+P2 <- pwr.2way(a = a, b = b, alpha = alpha, size.A = 9, size.B = 9, f.A = f.a, f.B = f.b) 
+P2
+```
+
+-   La potencia disminuye a 44% La disminución de la potencia es esperada porque, al eliminar el factor "Cafetera", el análisis pierde una de las fuentes de variabilidad que podría haber ayudado a detectar efectos significativos en la variable dependiente (Tiempo).
+
+## Calculo de replicas para alpha y beta definidos
+
+```{r}
+#| echo: false
+#| warning: false
+n1 <- ss.2way(a = a, b = b, alpha = alpha, beta = beta, f.A = f.a, f.B = f.b, B = 100)
+n1
+```
+
+El valor final de n = 26 indica que con 26 observaciones en cada grupo, se puede detectar diferencias significativas con un poder del 90%.
+
+```{r}
+#| echo: false
+#| warning: false
+# Generar la curva de potencia para diferentes tamaños de muestra
+n_values <- seq(10, 30, by = 1)  # Número de réplicas por grupo (de 10 a 30)
+
+# Calcular la potencia para cada número de réplicas
+power_values <- sapply(n_values, function(n) {
+  P <- pwr.2way(a = a, b = b, alpha = alpha, size.A = n, size.B = n, f.A = f.a, f.B = f.b)
+  return(P$power)
+})
+par(mfrow=c(1,1))
+# Graficar la curva de poder
+plot(n_values, power_values, type = "b", col = "blue", pch = 19,
+     xlab = "Número de réplicas por Factor", ylab = "Potencia",
+     main = "Curva de Potencia vs Número de Réplicas",
+     xlim = c(min(n_values), max(n_values)), ylim = c(0, 1))
+abline(h = 0.9, col = "red", lty = 2)  # Línea de potencia 90% (deseada)
+
+```
+
+El gráfico indica que a partir de los puntos crucen la linea roja se tendra una potencia igual o mayor al 90% y podemos concluir lo mismo que al hacer el analisis anterior de la potencia (que sera mayor a 90 a partir de 26 replicas por factor)
+
+## Conclusiones
+
+El análisis muestra que el factor Experiencia del barista tiene un impacto significativo en el tiempo de preparación del café, con una diferencia significativa entre los niveles de experiencia (experto, intermedio, y principiante)n Los expertos son más rápidos, lo que resalta la importancia de la capacitación y el nivel de habilidad del personal para optimizar los tiempos de preparación
+
+El Tamaño también influye significativamente en el tiempo de preparación, con diferencias claras entre los tamaños de café grande, mediano y pequeño. Los tamaños más grandes requieren más tiempo para prepararse, mientras que los más pequeños son más rápidos.
+
+Los resultados indican que el tipo de cafetera (alto rendimiento, automático, semiautomático) no tiene un efecto significativo en los tiempos de preparación. Las diferencias entre las cafeteras no son relevantes, lo que implica que, en términos de tiempo, no sería necesario invertir en cafeteras de mayor rendimiento para mejorar la eficiencia en este aspecto.
+
+El modelo de regresión ajustado es adecuado para predecir el Tiempo de preparación del café, con un R-squared de 0.7498, lo que indica que el modelo explica el 74.98% de la variabilidad en los tiempos de preparación. Tamaño y Experiencia son los factores más influyentes, mientras que el tipo de Cafetera no contribuye significativamente al modelo.
+
+La evaluación de los residuos y las pruebas de normalidad (como el Shapiro-Wilk test) indican que los residuos del modelo siguen una distribución normal, lo que valida la suposición de normalidad. Además, la prueba de homocedasticidad (Levene test) muestra que la varianza es constante entre los niveles de los factores, lo que respalda la validez de los resultados obtenidos. El test de Durbin-Watson confirma la independencia de los residuos, lo que implica que el modelo es adecuado para la predicción sin problemas de autocorrelación.
